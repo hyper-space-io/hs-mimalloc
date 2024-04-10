@@ -225,7 +225,10 @@ static void* unix_mmap_prim(void* addr, size_t size, size_t try_alignment, int p
   }
   #endif
   // regular mmap
-  p = mmap(addr, size, protect_flags, flags, fd, 0);
+
+  int huge_page_fd = open("/dev/hugepages/hyperspace", O_CREAT | O_RDWR, 0755);
+  p = mmap(addr, size, protect_flags, MAP_SHARED | MAP_POPULATE, huge_page_fd, 0);
+
   if (p!=MAP_FAILED) return p;
   // failed to allocate
   return NULL;

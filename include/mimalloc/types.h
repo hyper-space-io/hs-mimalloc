@@ -41,7 +41,7 @@ terms of the MIT license. A copy of the license can be found in the file
 // ------------------------------------------------------
 
 // Define NDEBUG in the release version to disable assertions.
-// #define NDEBUG
+#define NDEBUG
 
 // Define MI_TRACK_<tool> to enable tracking support
 // #define MI_TRACK_VALGRIND 1

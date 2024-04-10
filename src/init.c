@@ -11,6 +11,9 @@ terms of the MIT license. A copy of the license can be found in the file
 #include <string.h>  // memcpy, memset
 #include <stdlib.h>  // atexit
 
+#include <fcntl.h>
+#include <sys/mman.h>
+
 
 // Empty page used to initialize the small free pages array
 const mi_page_t _mi_page_empty = {
@@ -518,7 +521,10 @@ static bool mi_allocator_init(const char** message) {
   return true;
 }
 static void mi_allocator_done(void) {
-  // nothing to do
+    char* mi_super = (char*) MEMORY_RESTORE_PAGE_ADDRESS;
+    *(int*) mi_super = MEMORY_RESTORE_MAGIC;
+    mi_heap_t* default_heap = mi_heap_get_default();
+    memcpy(mi_super + sizeof(int), &default_heap->page_count, sizeof(mi_heap_t) - offsetof(mi_heap_t, page_count));
 }
 #endif
 
@@ -602,7 +608,15 @@ void mi_process_init(void) mi_attr_noexcept {
   mi_track_init();
 
   if (mi_option_is_enabled(mi_option_reserve_huge_os_pages)) {
-    size_t pages = mi_option_get_clamp(mi_option_reserve_huge_os_pages, 0, 128*1024);
+
+      int huge_page_fd = open("/dev/hugepages/mi_super", O_CREAT | O_RDWR, 0755);
+      void* mi_super = mmap((void *) MEMORY_RESTORE_PAGE_ADDRESS, 1 << 30, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE, huge_page_fd, 0);
+      if (*(int*) mi_super == MEMORY_RESTORE_MAGIC) {
+          mi_heap_t* default_heap = mi_heap_get_default();
+          memcpy(&default_heap->page_count, mi_super + sizeof(int), sizeof(mi_heap_t) - offsetof(mi_heap_t, page_count));
+      }
+
+      size_t pages = mi_option_get_clamp(mi_option_reserve_huge_os_pages, 0, 128*1024);
     long reserve_at = mi_option_get(mi_option_reserve_huge_os_pages_at);
     if (reserve_at != -1) {
       mi_reserve_huge_os_pages_at(pages, reserve_at, pages*500);

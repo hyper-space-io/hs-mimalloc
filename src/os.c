@@ -106,10 +106,10 @@ void* _mi_os_get_aligned_hint(size_t try_alignment, size_t size)
   uintptr_t hint = mi_atomic_add_acq_rel(&aligned_base, size);
   if (hint == 0 || hint > MI_HINT_MAX) {   // wrap or initialize
     uintptr_t init = MI_HINT_BASE;
-    #if (MI_SECURE>0 || MI_DEBUG==0)       // security: randomize start of aligned allocations unless in debug mode
-    uintptr_t r = _mi_heap_random_next(mi_prim_get_default_heap());
-    init = init + ((MI_SEGMENT_SIZE * ((r>>17) & 0xFFFFF)) % MI_HINT_AREA);  // (randomly 20 bits)*4MiB == 0 to 4TiB
-    #endif
+//    #if (MI_SECURE>0 || MI_DEBUG==0)       // security: randomize start of aligned allocations unless in debug mode
+//    uintptr_t r = _mi_heap_random_next(mi_prim_get_default_heap());
+//    init = init + ((MI_SEGMENT_SIZE * ((r>>17) & 0xFFFFF)) % MI_HINT_AREA);  // (randomly 20 bits)*4MiB == 0 to 4TiB
+//    #endif
     uintptr_t expected = hint + size;
     mi_atomic_cas_strong_acq_rel(&aligned_base, &expected, init);
     hint = mi_atomic_add_acq_rel(&aligned_base, size); // this may still give 0 or > MI_HINT_MAX but that is ok, it is a hint after all

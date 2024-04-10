@@ -10,6 +10,9 @@ terms of the MIT license. A copy of the license can be found in the file
 
 #define MI_MALLOC_VERSION 214   // major + 2 digits minor
 
+#define MEMORY_RESTORE_PAGE_ADDRESS 0x300000000000
+#define MEMORY_RESTORE_MAGIC 0x3221
+
 // ------------------------------------------------------
 // Compiler specific attributes
 // ------------------------------------------------------
