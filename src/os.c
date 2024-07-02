@@ -415,7 +415,6 @@ static bool mi_os_decommit_ex(void* addr, size_t size, bool* needs_recommit, mi_
   mi_stats_t* stats = &_mi_stats_main;
   mi_assert_internal(needs_recommit!=NULL);
   _mi_stat_decrease(&stats->committed, size);
-
   // page align
   size_t csize;
   void* start = mi_os_page_align_area_conservative(addr, size, &csize);
@@ -582,7 +581,7 @@ void* _mi_os_alloc_huge_os_pages(size_t pages, int numa_node, mi_msecs_t max_mse
     bool is_zero = false;
     void* addr = start + (page * MI_HUGE_OS_PAGE_SIZE);
     void* p = NULL;
-    int err = _mi_prim_alloc_huge_os_pages(addr, MI_HUGE_OS_PAGE_SIZE, numa_node, &is_zero, &p);
+    int err = _mi_prim_alloc_huge_os_pages(addr, MI_HUGE_OS_PAGE_SIZE, numa_node, &is_zero, &p, pages);
     if (!is_zero) { all_zero = false;  }
     if (err != 0) {
       _mi_warning_message("unable to allocate huge OS page (error: %d (0x%x), address: %p, size: %zx bytes)\n", err, err, addr, MI_HUGE_OS_PAGE_SIZE);

@@ -67,7 +67,7 @@ int _mi_prim_protect(void* addr, size_t size, bool protect);
 // `is_zero` is set to true if the memory was zero initialized (as on most OS's)
 // pre: size > 0  and a multiple of 1GiB.
 //      numa_node is either negative (don't care), or a numa node number.
-int _mi_prim_alloc_huge_os_pages(void* hint_addr, size_t size, int numa_node, bool* is_zero, void** addr);
+int _mi_prim_alloc_huge_os_pages(void* hint_addr, size_t size, int numa_node, bool* is_zero, void** addr, int pages);
 
 // Return the current NUMA node
 size_t _mi_prim_numa_node(void);

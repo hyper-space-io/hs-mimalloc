@@ -588,6 +588,8 @@ typedef struct mi_stat_counter_s {
 } mi_stat_counter_t;
 
 typedef struct mi_stats_s {
+  void* ptrs[100];
+  bool is_first_allocation;
   mi_stat_count_t segments;
   mi_stat_count_t pages;
   mi_stat_count_t reserved;
@@ -616,6 +618,7 @@ typedef struct mi_stats_s {
   mi_stat_counter_t arena_count;
   mi_stat_counter_t arena_crossover_count;
   mi_stat_counter_t arena_rollback_count;
+  mi_stat_counter_t huge_pages_allocations;
 #if MI_STAT>1
   mi_stat_count_t normal_bins[MI_BIN_HUGE+1];
 #endif

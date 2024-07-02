@@ -62,6 +62,7 @@ void _mi_stat_counter_increase(mi_stat_counter_t* stat, size_t amount) {
   }
 }
 
+
 void _mi_stat_increase(mi_stat_count_t* stat, size_t amount) {
   mi_stat_update(stat, (int64_t)amount);
 }
@@ -383,10 +384,16 @@ static void mi_stats_merge_from(mi_stats_t* stats) {
   }
 }
 
+void** mi_get_huge_ptrs() {
+    mi_stats_t* stats = &_mi_stats_main;
+    return stats->ptrs;
+}
+
 void mi_stats_reset(void) mi_attr_noexcept {
   mi_stats_t* stats = mi_stats_get_default();
   if (stats != &_mi_stats_main) { memset(stats, 0, sizeof(mi_stats_t)); }
   memset(&_mi_stats_main, 0, sizeof(mi_stats_t));
+    *(&_mi_stats_main.is_first_allocation) = true;
   if (mi_process_start == 0) { mi_process_start = _mi_clock_start(); };
 }
 
