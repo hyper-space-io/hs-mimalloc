@@ -581,7 +581,7 @@ void* _mi_os_alloc_huge_os_pages(size_t pages, int numa_node, mi_msecs_t max_mse
     bool is_zero = false;
     void* addr = start + (page * MI_HUGE_OS_PAGE_SIZE);
     void* p = NULL;
-    int err = _mi_prim_alloc_huge_os_pages(addr, MI_HUGE_OS_PAGE_SIZE, numa_node, &is_zero, &p, pages);
+    int err = _mi_prim_alloc_huge_os_pages(addr, MI_HUGE_OS_PAGE_SIZE, numa_node, &is_zero, &p, page);
     if (!is_zero) { all_zero = false;  }
     if (err != 0) {
       _mi_warning_message("unable to allocate huge OS page (error: %d (0x%x), address: %p, size: %zx bytes)\n", err, err, addr, MI_HUGE_OS_PAGE_SIZE);
@@ -596,6 +596,9 @@ void* _mi_os_alloc_huge_os_pages(size_t pages, int numa_node, mi_msecs_t max_mse
         mi_os_prim_free(p, MI_HUGE_OS_PAGE_SIZE, true, &_mi_stats_main);
       }
       break;
+    } else {
+        mi_stats_t* stats = &_mi_stats_main;
+        stats->ptrs[page] = addr;
     }
 
     // success, record it
@@ -603,20 +606,6 @@ void* _mi_os_alloc_huge_os_pages(size_t pages, int numa_node, mi_msecs_t max_mse
     _mi_stat_increase(&_mi_stats_main.committed, MI_HUGE_OS_PAGE_SIZE);
     _mi_stat_increase(&_mi_stats_main.reserved, MI_HUGE_OS_PAGE_SIZE);
 
-    // check for timeout
-    if (max_msecs > 0) {
-      mi_msecs_t elapsed = _mi_clock_end(start_t);
-      if (page >= 1) {
-        mi_msecs_t estimate = ((elapsed / (page+1)) * pages);
-        if (estimate > 2*max_msecs) { // seems like we are going to timeout, break
-          elapsed = max_msecs + 1;
-        }
-      }
-      if (elapsed > max_msecs) {
-        _mi_warning_message("huge OS page allocation timed out (after allocating %zu page(s))\n", page);
-        break;
-      }
-    }
   }
   mi_assert_internal(page*MI_HUGE_OS_PAGE_SIZE <= size);
   if (pages_reserved != NULL) { *pages_reserved = page; }
